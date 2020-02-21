@@ -13,113 +13,19 @@ const db = knex({ // config for database
   }
 });
 
-// db.select("*").from("users")
-// .then(data => console.log(data)); // query
-
 const app = express();
 app.use(express.json()); // parse JSON so that server can read as obj
 app.use(cors());
-/////////////////
-//	BcryptJS
 
-
-// bcrypt.compare("apples", "$2a$10$FF5CxvnYmeM84IhDmh14QeZTSHjR9XsTpxHZo7dEmBVlUi8HjhqDW", function(err, res) {
-//     // res === false
-// });
-
-// bcrypt.compare("apples", "$2a$10$FF5CxvnYmeM84IhDmh14QeZTSHjR9XsTpxHZo7dEmBVlUi8HjhqDW", 
-	// 	function(err, res) {
- //    	// res === false
- //    	console.log("first guess", res);
-	// });
-	// bcrypt.compare("veggies", "$2a$10$FF5CxvnYmeM84IhDmh14QeZTSHjR9XsTpxHZo7dEmBVlUi8HjhqDW", 
-	// 	function(err, res) {
- //    	// res === false
- //    	console.log("second guess", res);
-	// });
-// bcrypt.genSalt(10, (err, salt) => { // hash password
-	// 	bcrypt.hash(password, salt, (err, hash) => {
-	// 		console.log(hash);
-	// 	})
-	// });
-
-const db2 = { // database/variable for users, temp database
-	users: [
-		{ 
-			id:"123",
-			name:"John",
-			email:"john@gmail.com",
-			password:"pass123",
-			entries: 0, // image submissions
-			joined: new Date()
-		},
-		{
-			id:"124",
-			name:"Holly",
-			email:"holly@hotmail.com",
-			password:"holly124",
-			entries:0,
-			joined: new Date()
-		}
-	],
-	login: [
-		{
-			id:"987",
-			hash:"",
-			"email":"john@gmail.com"
-		}
-	]
+////////////////
+// functions
+ function hashPassword(plaintext_password) { // async hashing password
+ 	const salt = bcrypt.genSaltSync(10);
+ 	const hashed = bcrypt.hashSync(plaintext_password, salt);
+	return hashed;
 }
 
-app.get("/", (req, res) => {
-	res.send(db.users);
-})
-
-/////////////////
-//	1. SIGNIN
-app.post("/signin", (req, res)=> {
-	
-	// request we make from the signin form and compare against our database
-	if(req.body.email === db.users[0].email && 
-		req.body.password === db.users[0].password) {
-		// res.json("Success");
-		res.json(db.users[0]);
-	} else {
-		res.status(400).json("error logging in");
-	}
-});
-////////////////
-// 2. REGISTER
-app.post("/register", (req, res) => {
-	const {name, email, password} = req.body;
-	// Add to users table if details aren't EMPTY
-	if(name !== "" && email !== "" && password !== "") {
-		db('users') // insert user to table and return all columns
-			.returning('*')
-			.insert({
-		 		email:email,
-				name: name,
-				joined: new Date()
-			})
-			.then(user => {
-				// res.json(db2.users[database.users.length -1]);
-				if(user.length) {
-					res.json(user[0]); // only provide the returned user, not an array
-				} else {
-					throw new Error("Unable to register");
-				}
-			})
-			.catch(error => res.status(400).json(error.message));
-	} else {
-		// for Front-end 
-		res.status(400).json("Error, registration failed");	
-	}
-	
-})
-
-////////////////
-// 3. PROFILE
-function getData(db_name, express_req, express_resp, http_method) {
+function getData(db_name, express_req, express_resp, http_method) { // used by IMAGE + PROFILE
 	const { id } = express_req;
 	if(http_method === "GET") {
 		// grab users where id matches express param /profile/:id
@@ -149,6 +55,85 @@ function getData(db_name, express_req, express_resp, http_method) {
 	}
 }
 
+app.get("/", (req, res) => {
+	res.send(db.users);
+})
+
+///////////////// - ROUTES
+//	1. SIGNIN
+app.post("/signin", (req, res)=> {
+	const {email, password} = req.body;
+
+	// get email from login (signin page) then compare against users table and check hash with bcrypt
+	db.select("email", "hash").from("login")
+	  .where("email", "=", email)
+	  .then(data => {
+  		const isValid = bcrypt.compareSync(password, data[0].hash);
+  		if(isValid) {
+			return db.select("*").from("users") // check signin email against the registered email (users table)
+  			  .where("email", "=", email)
+  			  .then(user => {
+  			  		console.log(user);
+					res.json(user[0]); // we don't want to respond the hash!
+  			  })
+			  .catch(err => res.status(400).json("unable to get user"));
+  		} else {
+  			throw new Error("error logging in");
+  		}
+	  })
+	  .catch(err => res.status(400).json(err.message));
+
+});
+
+////////////////
+// 2. REGISTER
+app.post("/register", (req, res) => {
+	const {name, email, password} = req.body;
+	const hash = hashPassword(password);
+
+	// Add to users table if details aren't EMPTY
+	if(name !== "" && email !== "" && password !== "") {
+		/*
+			transaction - if user or login fail -> rollback, keep consistent data
+			insert hash, email to
+		*/
+		db.transaction((trx) => {
+			 trx.insert({
+			 	hash,
+			 	email // ES6 email: email, ...
+			 	
+			 })
+			 .into('login')
+			 .returning("email")
+			 .then(loginEmail => {
+				return trx.select("*").from('users') // email from table login, then loginEmail to users table and return all columns
+					.returning('*')
+					.insert({
+				 		email:loginEmail[0],
+						name: name,
+						joined: new Date()
+					})
+					.then(user => {
+						if(user.length) {
+							res.json(user[0]); // only provide the returned user, not an array
+						} else {
+							throw new Error("Unable to register");
+						}
+					})
+					.then(trx.commit) // insert data else rollback
+					.catch(trx.rollback)
+			 	})
+			 .catch(error => res.status(400).json(error.message));
+		});
+	} else {
+		// for Front-end 
+		res.status(400).json("Error, registration failed");	
+	}
+	
+})
+
+////////////////
+// 3. PROFILE
 app.get("/profile/:id", (req, res) => { // can grab this id and use it
 	getData(db, req.params, res, "GET");
 }) 
