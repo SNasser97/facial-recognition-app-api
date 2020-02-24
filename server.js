@@ -69,7 +69,7 @@ app.post("/signin", (req, res)=> {
 	  .where("email", "=", email)
 	  .then(data => {
   		const isValid = bcrypt.compareSync(password, data[0].hash);
-  		if(isValid) {
+  		if(data[0].email === email && isValid) {
 			return db.select("*").from("users") // check signin email against the registered email (users table)
   			  .where("email", "=", email)
   			  .then(user => {
