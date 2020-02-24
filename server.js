@@ -73,7 +73,6 @@ app.post("/signin", (req, res)=> {
 			return db.select("*").from("users") // check signin email against the registered email (users table)
   			  .where("email", "=", email)
   			  .then(user => {
-  			  		console.log(user);
 					res.json(user[0]); // we don't want to respond the hash!
   			  })
 			  .catch(err => res.status(400).json("unable to get user"));
