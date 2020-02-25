@@ -7,7 +7,6 @@ const handleHash = (plaintext_password, bcrypt) => { // async hashing password
 const handleRegister = (req,res, db, bcrypt) => {
 	const {name, email, password} = req.body;
 	const hash = handleHash(password, bcrypt);
-
 	// Add to users table if details aren't EMPTY
 	if(name !== "" && email !== "" && password !== "") {
 		/*
