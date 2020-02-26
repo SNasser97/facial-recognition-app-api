@@ -5,13 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "node server.js",
+    "startdev":"nodemon server.js"
   },
   "author": "Nasser",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "clarifai": "^2.9.1",
     "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "knex": "^0.20.10",
     "pg": "^7.18.2"

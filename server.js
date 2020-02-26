@@ -1,3 +1,4 @@
+require('dotenv').config(); // for env variables
 const express = require("express");
 const bcrypt = require("bcryptjs"); // hashing credentials
 const cors = require("cors"); // enable CORS to allow calls between FE and BE of app
@@ -11,10 +12,10 @@ const profile = require("./controllers/profile");
 const db = knex({ // config for database
   client: "pg",
   connection: {
-    host : "127.0.0.1", // localhost
-    user : "postgres",
-    password : "nahmed",
-    database : "facial-recog"
+    host : process.env.DB_HOST,
+    user : process.env.DB_USER,
+    password : process.env.DB_PASS,
+    database : process.env.DB_NAME
   }
 });
 
@@ -51,9 +52,13 @@ app.get("/profile/:id", (req, res) => { // can grab this id and use it
 app.put("/image", (req, res) => {
 	profile.handleProfile(req.body,res, db, "PUT");
 })
+app.post("/image_url", (req, res) => {
+	profile.handleApiCall(req,res);
+})
 
-app.listen(3001, ()=> {
-	console.log("app is running on 3001 ..");
+const SERVER_PORT = process.env.PORT;
+app.listen(SERVER_PORT, ()=> {
+	console.log(`app is running on ${SERVER_PORT}..`);
 });
 
 
