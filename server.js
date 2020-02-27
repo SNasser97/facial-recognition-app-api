@@ -14,7 +14,6 @@ const db = knex({ // config for database
   connection: {
     connectionString : process.env.DATABASE_URL,
     ssl:true
-    
     //   FOR LOCAL MACHINE   //
     /* --------------------- */
 
