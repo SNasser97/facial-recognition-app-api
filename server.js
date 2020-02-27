@@ -12,15 +12,15 @@ const profile = require("./controllers/profile");
 const db = knex({ // config for database
   client: "pg",
   connection: {
-    // connectionString : process.env.DATABASE_URL,
-    // ssl:true
+    connectionString : process.env.DATABASE_URL,
+    ssl:true
     //   FOR LOCAL MACHINE   //
     /* --------------------- */
 
-    host:"postgresql-clean-17325",
-    user : "db_username",
-    password : "db_password",
-    database :"db_name"
+    // host:"postgresql-clean-17325",
+    // user : "db_username",
+    // password : "db_password",
+    // database :"db_name"
 
     /* --------------------- */
   }
