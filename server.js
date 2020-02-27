@@ -14,9 +14,16 @@ const db = knex({ // config for database
   connection: {
     connectionString : process.env.DATABASE_URL,
     ssl:true
-    // user : "postgres",
-    // password : "",
-    // database :"facial-recog"
+    
+    //   FOR LOCAL MACHINE   //
+    /* --------------------- */
+
+    // host:"127.0.0.1"
+    // user : "db_username",
+    // password : "db_password",
+    // database :"db_name"
+
+    /* --------------------- */
   }
 });
 
