@@ -20,8 +20,9 @@ const db = knex({ // config for database
 });
 
 const app = express();
-app.use(express.json()); // parse JSON so that server can read as obj
 app.use(cors());
+app.use(express.json()); // parse JSON so that server can read as obj
+
 
 app.get("/", (req, res) => {
 	res.send("it is working!");
