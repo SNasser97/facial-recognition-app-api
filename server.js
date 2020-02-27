@@ -12,10 +12,10 @@ const profile = require("./controllers/profile");
 const db = knex({ // config for database
   client: "pg",
   connection: {
-    host : process.env.DB_HOST,
-    user : process.env.DB_USER,
-    password : process.env.DB_PASS,
-    database : process.env.DB_NAME
+    host : "127.0.0.1",
+    user : "postgres",
+    password : "nahmed",
+    database :"facial-recog"
   }
 });
 
