@@ -1,4 +1,4 @@
-const { FACE_DETECT_MODEL } = require('clarifai');
+const { Clarifai, FACE_DETECT_MODEL } = require('clarifai');
 
 const app = new Clarifai.App({
 	apiKey: process.env.CLARIFAI_API_KEY // ADD YOUR API KEY HERE
