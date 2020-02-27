@@ -30,7 +30,6 @@ app.get("/", (req, res) => {
 ///////////////// - ROUTES
 //	1. SIGNIN
 app.post("/signin", (req, res)=> {
-	console.log(db.connection.host, db.connection.database);
 	signin.handleSignIn(req,res,db,bcrypt);
 });
 
