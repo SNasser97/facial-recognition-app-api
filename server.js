@@ -24,9 +24,7 @@ app.use(express.json()); // parse JSON so that server can read as obj
 app.use(cors());
 
 app.get("/", (req, res) => {
-	// res.send(db.users);
-	console.log("success!!!");
-	res.json(db.select("*").from("users"));
+	res.send("it is working!");
 })
 
 ///////////////// - ROUTES
