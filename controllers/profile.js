@@ -8,7 +8,7 @@ const handleApiCall = (req, res) => {
 	// console.log(req.body.input);
 	app.models
 		.predict(FACE_DETECT_MODEL, req.body.input)
-		.then(data => res.json(data)
+		.then(data => res.json({ data }))
 		.catch(err => res.status(400).json("Unable to work with api"));
 }
 
