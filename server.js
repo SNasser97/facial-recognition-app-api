@@ -17,7 +17,7 @@ const db = knex({ // config for database
     //   FOR LOCAL MACHINE   //
     /* --------------------- */
 
-    // host:"postgresql-clean-17325",
+    // host:"127.0.0.1",
     // user : "db_username",
     // password : "db_password",
     // database :"db_name"
